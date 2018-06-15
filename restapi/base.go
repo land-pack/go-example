@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"net/http"
 )
 
 func main() {
@@ -81,5 +81,32 @@ func main() {
 		})
 
 	})
+
+
+	// POST new person details
+	// curl -F "first_name=jack; last_name=jk" http://127.0.0.1:3000/person
+	router.POST("/person", func(c *gin.Context) {
+		var buffer bytes.Buffer
+		first_name := c.PostForm("first_name")
+		last_name := c.PostForm("last_name")
+		stmt, err := db.Prepare("INSERT INTO person (first_name, last_name)VALUES(?, ?);")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(first_name, last_name)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		// Fastest way to append string
+		buffer.WriteString(first_name)
+		buffer.WriteString(" ")
+		buffer.WriteString(last_name)
+		defer stmt.Close()
+		name := buffer.String()
+		c.JSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf(" %s successfully created", name),
+		})
+	})
+
 	router.Run(":3000")
 }
