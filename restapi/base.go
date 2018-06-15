@@ -82,7 +82,6 @@ func main() {
 
 	})
 
-
 	// POST new person details
 	// curl -F "first_name=jack; last_name=jk" http://127.0.0.1:3000/person
 	router.POST("/person", func(c *gin.Context) {
@@ -107,6 +106,22 @@ func main() {
 			"message": fmt.Sprintf(" %s successfully created", name),
 		})
 	})
-
-	router.Run(":3000")
+	// Detele resources
+	// curl -X DELETE http://127.0.0.1:3001/person?id=1
+	router.DELETE("/person", func(c *gin.Context) {
+		id := c.Query("id")
+		fmt.Println("The id which we want to delete is ", id)
+		stmt, err := db.Prepare("DELETE FROM person WHERE id=?;")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(id)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf("Successfully deleted user: %s", id),
+		})
+	})
+	router.Run(":3001")
 }
