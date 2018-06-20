@@ -124,11 +124,12 @@ func main() {
 		})
 	})
 	// PUT - update a person details
+	// curl -X PUT -d last_name='aa' -d first_name='ss' http://127.0.0.1:3000/person?id=3
 	router.PUT("/person", func(c *gin.Context) {
 		var buffer bytes.Buffer
 		id := c.Query("id")
-		first_name := c.FormValue("first_name")
-		last_name := c.FormValue("last_name")
+		first_name := c.PostForm("first_name")
+		last_name := c.PostForm("last_name")
 		fmt.Println(id, first_name, last_name)
 		stmt, err := db.Prepare("UPDATE person SET first_name=?, last_name=? WHERE id=?;")
 		if err != nil {
