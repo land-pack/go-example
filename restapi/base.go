@@ -123,5 +123,31 @@ func main() {
 			"message": fmt.Sprintf("Successfully deleted user: %s", id),
 		})
 	})
-	router.Run(":3001")
+	// PUT - update a person details
+	router.PUT("/person", func(c *gin.Context) {
+		var buffer bytes.Buffer
+		id := c.Query("id")
+		first_name := c.FormValue("first_name")
+		last_name := c.FormValue("last_name")
+		fmt.Println(id, first_name, last_name)
+		stmt, err := db.Prepare("UPDATE person SET first_name=?, last_name=? WHERE id=?;")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(first_name, last_name, id)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		// Fast way to append string
+		buffer.WriteString(first_name)
+		buffer.WriteString(" ")
+		buffer.WriteString(last_name)
+		defer stmt.Close()
+		name := buffer.String()
+		c.JSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf("Successfully updated to %s", name),
+		})
+	})
+
+	router.Run(":3000")
 }
